@@ -1,0 +1,9 @@
+{
+  "name": "mood-tracker",
+  "private": true,
+  "workspaces": ["apps/*"],
+  "scripts": {
+    "dev:api": "npm --workspace apps/bot-api run dev",
+    "dev:web": "npm --workspace apps/web run dev"
+  }
+}
