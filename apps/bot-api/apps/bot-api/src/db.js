@@ -1,9 +1,16 @@
-import pg from "pg";
+import { createClient } from '@supabase/supabase-js'
 
-export const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL
-});
+const supabaseUrl = process.env.SUPABASE_URL
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-export async function q(text, params) {
-  return pool.query(text, params);
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase env vars')
 }
+
+export const supabase = createClient(
+  supabaseUrl,
+  supabaseKey,
+  {
+    auth: { persistSession: false }
+  }
+)
