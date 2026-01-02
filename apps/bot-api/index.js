@@ -8,19 +8,20 @@ const PORT = process.env.PORT || 3000
 app.use(express.json())
 app.use('/moods', moodsRouter)
 
-// health check (important)
+// health check
 app.get('/', (_, res) => res.send('OK'))
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`API running on port ${PORT}`)
+
+  // ✅ start workers ONLY after HTTP is live
+  if (process.env.ENABLE_BOT === 'true') {
+    const { startTelegramBot } = await import('./telegramBot.js')
+    startTelegramBot()
+  }
+
+  if (process.env.ENABLE_JOBS === 'true') {
+    const { startDailyReminder } = await import('./src/jobs/dailyReminder.js')
+    startDailyReminder()
+  }
 })
-
-// 🔒 only start workers in production runtime
-if (process.env.ENABLE_BOT === 'true') {
-  await import('./telegramBot.js')
-}
-
-if (process.env.ENABLE_JOBS === 'true') {
-  const { startDailyReminder } = await import('./src/jobs/dailyReminder.js')
-  startDailyReminder()
-}

@@ -62,9 +62,7 @@ bot.on('text', async (ctx) => {
     await supabase
       .from('telegram_users')
       .upsert({ telegram_user_id: telegramUserId, chat_id: chatId })
-  } catch {
-    // ignore — not critical path
-  }
+  } catch {}
 
   const m = text.match(/^([1-9]|10)\b(?:\s+(.+))?$/)
   if (!m) {
@@ -91,7 +89,14 @@ bot.on('text', async (ctx) => {
   }
 })
 
-bot.launch()
+export async function startTelegramBot() {
+  try {
+    await bot.launch()
+    console.log('Telegram bot started')
+  } catch (err) {
+    console.error('Telegram bot failed:', err.message)
+  }
+}
 
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
