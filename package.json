@@ -1,15 +1,5 @@
 {
   "name": "mood-tracker",
   "private": true,
-  "workspaces": [
-    "apps/*"
-  ],
-  "scripts": {
-    "dev:api": "npm --workspace apps/bot-api run dev",
-    "dev:web": "npm --workspace apps/web run dev"
-  },
-  "dependencies": {
-    "node-cron": "^4.2.1",
-    "node-fetch": "^3.3.2"
-  }
+  "workspaces": ["apps/*"]
 }

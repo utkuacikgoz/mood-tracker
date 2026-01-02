@@ -1,8 +1,8 @@
 import 'dotenv/config'
 import express from 'express'
-import moodsRouter from './routes/moods.js'
+import moodsRouter from '../src/routes/moods.js'
 import './telegramBot.js'
-import { startDailyReminder } from './jobs/dailyReminder.js'
+import { startDailyReminder } from '../src/jobs/dailyReminder.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
