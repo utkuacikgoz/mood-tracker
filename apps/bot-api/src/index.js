@@ -1,31 +1,17 @@
-import "dotenv/config";
-import { Telegraf } from "telegraf";
+import 'dotenv/config'
+import express from 'express'
+import moodsRouter from './routes/moods.js'
+import './telegramBot.js'
+import { startDailyReminder } from './jobs/dailyReminder.js'
 
-const { TELEGRAM_BOT_TOKEN } = process.env;
-if (!TELEGRAM_BOT_TOKEN) throw new Error("Missing TELEGRAM_BOT_TOKEN in .env");
+const app = express()
+const PORT = process.env.PORT || 3000
 
-const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
+app.use(express.json())
+app.use('/moods', moodsRouter)
 
-bot.start(async (ctx) => {
-  await ctx.reply(
-    "Mood Tracker ✅\n\nReply with a number 1–10 anytime.\nExample: `7` or `7 felt anxious`",
-    { parse_mode: "Markdown" }
-  );
-});
+app.listen(PORT, () => {
+  console.log(`API running on http://localhost:${PORT}`)
+})
 
-bot.on("text", async (ctx) => {
-  const text = (ctx.message.text || "").trim();
-  const m = text.match(/^([1-9]|10)\b(?:\s+(.+))?$/);
-  if (!m) return ctx.reply("Send a number 1–10 (optional note). Example: `8 great day`", { parse_mode: "Markdown" });
-
-  const score = Number(m[1]);
-  const note = m[2]?.trim() || null;
-
-  await ctx.reply(`Saved: ${score}${note ? ` — ${note}` : ""}`);
-});
-
-bot.launch();
-console.log("Bot running.");
-
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+startDailyReminder()
