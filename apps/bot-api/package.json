@@ -20,7 +20,8 @@
     "nanoid": "^5.1.6",
     "node-cron": "^4.2.1",
     "pg": "^8.16.3",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "@supabase/supabase-js": "^2.48.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.11"
