@@ -1,32 +1,34 @@
 import cron from 'node-cron'
-import TelegramBot from 'node-telegram-bot-api'
+import { Telegraf } from 'telegraf'
 import { supabase } from '../db.js'
 
 const token = process.env.TELEGRAM_BOT_TOKEN
 if (!token) throw new Error('Missing TELEGRAM_BOT_TOKEN')
 
-const bot = new TelegramBot(token, { polling: false })
+const bot = new Telegraf(token)
 
 export function startDailyReminder() {
-  // Every day at 21:00 SERVER TIME
+  // every day at 21:00 server time
   cron.schedule('0 21 * * *', async () => {
-    try {
-      const { data, error } = await supabase
-        .from('telegram_users')
-        .select('chat_id')
+    const { data, error } = await supabase
+      .from('telegram_users')
+      .select('chat_id')
 
-      if (error || !data?.length) return
+    if (error) {
+      console.error('dailyReminder select error:', error.message)
+      return
+    }
+    if (!data?.length) return
 
-      await Promise.all(
-        data.map((u) =>
-          bot.sendMessage(
-            u.chat_id,
-            'How was your day? Send a mood score (1–10)'
-          )
+    for (const u of data) {
+      try {
+        await bot.telegram.sendMessage(
+          u.chat_id,
+          'How was your day? Send a mood score (1–10)'
         )
-      )
-    } catch (err) {
-      console.error('Daily reminder failed:', err.message)
+      } catch (e) {
+        console.error('dailyReminder send error:', u.chat_id, e?.message || e)
+      }
     }
   })
 }
