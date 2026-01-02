@@ -5,9 +5,9 @@
     "apps/*"
   ],
   "scripts": {
-    "dev:api": "npm --workspace apps/bot-api run dev",
-    "dev:web": "npm --workspace apps/web run dev"
-  },
+    "start": "node index.js" 
+     }
+}
   "dependencies": {
     "node-cron": "^4.2.1",
     "node-fetch": "^3.3.2"
