@@ -1,6 +1,6 @@
 import { Telegraf } from 'telegraf'
 import fetch from 'node-fetch'
-import { supabase } from '../src/db.js'
+import { supabase } from './src/db.js'
 
 const token = process.env.TELEGRAM_BOT_TOKEN
 if (!token) throw new Error('Missing TELEGRAM_BOT_TOKEN')
