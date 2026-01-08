@@ -1,8 +1,8 @@
 import 'dotenv/config'
 import express from 'express'
 
-import moodsRouter from './src/routes/moods.js'
-import telegramRouter from './src/routes/telegram.js'
+import moodsRouter from './moods.js'
+import telegramRouter from './telegram.js'
 
 const app = express()
 const PORT = process.env.PORT || 3000
