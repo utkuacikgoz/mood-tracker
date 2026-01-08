@@ -1,9 +1,13 @@
 import { Telegraf } from 'telegraf'
-import fetch from 'node-fetch'
 import { supabase } from './src/db.js'
 
+// Node 18+ (Railway) has global fetch → DO NOT import node-fetch
 const token = process.env.TELEGRAM_BOT_TOKEN
-if (!token) throw new Error('Missing TELEGRAM_BOT_TOKEN')
+
+if (!token) {
+  console.error('TELEGRAM_BOT_TOKEN missing')
+  // do NOT throw at import time
+}
 
 const API = process.env.API_BASE_URL || 'http://localhost:3000'
 export const bot = new Telegraf(token)
@@ -22,12 +26,14 @@ async function safeJson(res) {
   return res.json()
 }
 
+// /week
 bot.command('week', async ctx => {
   try {
     const res = await fetch(
       `${API}/moods/summary/weekly?telegramUserId=${ctx.from.id}`
     )
     const { avg, count } = await safeJson(res)
+
     if (!count) return ctx.reply('No moods logged this week.')
     ctx.reply(`📊 This week\nEntries: ${count}\nAvg mood: ${avg}`)
   } catch {
@@ -35,12 +41,14 @@ bot.command('week', async ctx => {
   }
 })
 
+// /month
 bot.command('month', async ctx => {
   try {
     const res = await fetch(
       `${API}/moods/summary/monthly?telegramUserId=${ctx.from.id}`
     )
     const { avg, count } = await safeJson(res)
+
     if (!count) return ctx.reply('No moods logged this month.')
     ctx.reply(`📈 This month\nEntries: ${count}\nAvg mood: ${avg}`)
   } catch {
@@ -48,11 +56,13 @@ bot.command('month', async ctx => {
   }
 })
 
+// mood input
 bot.on('text', async ctx => {
   const text = ctx.message.text.trim()
   const telegramUserId = ctx.from.id
   const chatId = ctx.chat.id
 
+  // store user (non-fatal)
   try {
     await supabase
       .from('telegram_users')
