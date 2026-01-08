@@ -6,29 +6,28 @@ const token = process.env.TELEGRAM_BOT_TOKEN
 if (!token) throw new Error('Missing TELEGRAM_BOT_TOKEN')
 
 const API = process.env.API_BASE_URL || 'http://localhost:3000'
-const bot = new Telegraf(token)
+export const bot = new Telegraf(token)
 
-bot.start((ctx) =>
+/* ---------- handlers ---------- */
+
+bot.start(ctx =>
   ctx.reply(
     'Mood Tracker ✅\n\nSend a number 1–10\nExample: `7 felt anxious`',
     { parse_mode: 'Markdown' }
   )
 )
 
-// helper
 async function safeJson(res) {
   if (!res.ok) throw new Error(`API ${res.status}`)
   return res.json()
 }
 
-// /week
-bot.command('week', async (ctx) => {
+bot.command('week', async ctx => {
   try {
     const res = await fetch(
       `${API}/moods/summary/weekly?telegramUserId=${ctx.from.id}`
     )
     const { avg, count } = await safeJson(res)
-
     if (!count) return ctx.reply('No moods logged this week.')
     ctx.reply(`📊 This week\nEntries: ${count}\nAvg mood: ${avg}`)
   } catch {
@@ -36,14 +35,12 @@ bot.command('week', async (ctx) => {
   }
 })
 
-// /month
-bot.command('month', async (ctx) => {
+bot.command('month', async ctx => {
   try {
     const res = await fetch(
       `${API}/moods/summary/monthly?telegramUserId=${ctx.from.id}`
     )
     const { avg, count } = await safeJson(res)
-
     if (!count) return ctx.reply('No moods logged this month.')
     ctx.reply(`📈 This month\nEntries: ${count}\nAvg mood: ${avg}`)
   } catch {
@@ -51,13 +48,11 @@ bot.command('month', async (ctx) => {
   }
 })
 
-// mood input
-bot.on('text', async (ctx) => {
+bot.on('text', async ctx => {
   const text = ctx.message.text.trim()
   const telegramUserId = ctx.from.id
   const chatId = ctx.chat.id
 
-  // store user (non-fatal)
   try {
     await supabase
       .from('telegram_users')
@@ -88,15 +83,3 @@ bot.on('text', async (ctx) => {
     ctx.reply('Failed to save mood.')
   }
 })
-
-export async function startTelegramBot() {
-  try {
-    await bot.launch()
-    console.log('Telegram bot started')
-  } catch (err) {
-    console.error('Telegram bot failed:', err.message)
-  }
-}
-
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
