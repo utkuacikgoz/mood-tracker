@@ -1,19 +1,24 @@
-import 'dotenv/config'
 import express from 'express'
+import { bot } from '../../telegramBot.js'
 
-import moodsRouter from './src/routes/moods.js'
-import telegramRouter from './src/routes/telegram.js'
+const router = express.Router()
 
-const app = express()
-const PORT = process.env.PORT || 3000
-
-app.use(express.json())
-
-app.use('/telegram', telegramRouter)
-app.use('/moods', moodsRouter)
-
-app.get('/', (_, res) => res.send('OK'))
-
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`API running on port ${PORT}`)
+router.post('/webhook', async (req, res) => {
+  try {
+    await bot.handleUpdate(req.body)
+    res.sendStatus(200)
+  } catch (err) {
+    console.error(err)
+    res.sendStatus(500)
+  }
 })
+
+export default router
+router.get('/summary/weekly', async (req, res) => {
+  const { telegramUserId } = req.query
+  try {
+    const data = await summary(telegramUserId, 7)
+    res.json(data)
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
